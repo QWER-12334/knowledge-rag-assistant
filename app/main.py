@@ -1,7 +1,3 @@
-from fastapi import FastAPI
+import os   #os 处理路径
+from .chunk import split_text
 
-app = FastAPI(title="RAG知识库助手")
-
-@app.get("/")
-def index():
-    return {"message": "RAG项目骨架启动成功 ✅"}
