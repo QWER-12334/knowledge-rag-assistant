@@ -5,7 +5,7 @@ def split_text(text:str , filename:str, chunk_size=500,chunk_overlap=50):
         chunk_overlap = chunk_overlap,
         length_function = len,
     )
-    chunks = text_chunk.split_text(text)
+    chunks = text_chunk.split_text(text)#切分完是列表！！！
     text_list = []
     for i in chunks:
         text_list.append(
