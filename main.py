@@ -9,7 +9,7 @@ for file_name in os.listdir(DATA_PATH):
             file_content = f.read()
         one_file_chunks = split_text(text = file_content,filename = file_name)
         all_chunk_list.extend(one_file_chunks)
-        print(f"✅ {file_name} 切完，生成 {len(one_file_chunks)} 个块")
+        print(f" {file_name} 切完，生成 {len(one_file_chunks)} 个块")
 print("\n==== 全部切块完成，一共", len(all_chunk_list), "块 ====")
 for i, chunk in enumerate(all_chunk_list[:]): # 只打印前3块预览
     print(f"块{i}: 来源：{chunk['source']}")
