@@ -12,7 +12,7 @@ def split_text(text:str , filename:str, chunk_size=500,chunk_overlap=50):
             {
                 "content":i,
                 "source":filename
-            }
+            }#是一个字典！！！(可以带两份信息)
         )
     return text_list
 if __name__ == "__main__":
