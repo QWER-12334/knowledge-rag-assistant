@@ -5,3 +5,4 @@ __pycache__/
 data/chroma_db/
 *.sqlite3
 *.db
+chroma_db/
