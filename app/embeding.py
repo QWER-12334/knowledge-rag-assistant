@@ -1,5 +1,5 @@
 import requests
-from dotenv import load_dotenv
+from dotenv import load_dotenv#用于读取.env的工具
 import os
 from langchain_core.embeddings import Embeddings
 load_dotenv()
@@ -20,7 +20,7 @@ class SiliconFlowEmbeddings(Embeddings):
             },
             timeout = 10#最多等10s
         )
-        response.raise_for_status()
+        response.raise_for_status()#检查请求是否成功
         data = response.json()
         return [item["embedding"] for item in data["data"]]
     def embed_documents(self, texts):# 入库时批量调用

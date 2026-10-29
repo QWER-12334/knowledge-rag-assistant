@@ -1,9 +1,12 @@
 import os   #os 处理路径
 from app.chunk import split_text
 from app.embeding import SiliconFlowEmbeddings
-from app.store import add_doc,vector_store
+from app.store import add_doc
 from app.retrieve import retrieve
+from app.prompt import fromat_docs,rag_prompt
+from app.generate import call_llm
 end = SiliconFlowEmbeddings()
+from app.rerank import rerank
 DATA_PATH = "./data"
 all_chunk_list = []
 for file_name in os.listdir(DATA_PATH):
@@ -15,19 +18,16 @@ for file_name in os.listdir(DATA_PATH):
         all_chunk_list.extend(one_file_chunks)
         add_doc (file_content,file_name)
         print(f"{file_name}入库完成,生成{len(one_file_chunks)}块")
-"""输出切块"""
+"""  #输出切块
 print("\n==== 全部切块完成，一共", len(all_chunk_list), "块 ====")
 for i, chunk in enumerate(all_chunk_list[:]): 
     print(f"第{i}块: 来源：{chunk['source']}")
     print(chunk["content"][:])
-"""向量化输出"""
+  #向量化输出
 for i,chunk in enumerate(all_chunk_list):
     print(f"第{i}块正在向量化")
     chunk["embeding"] = end.get_vec(chunk["content"])
-    print(f"向量为{chunk["embeding"]}")
-docs = vector_store.similarity_search("跨境电商发展情况", k=3)
-for d in docs:
-    print(d.metadata["source"], "|", d.page_content[:40], "...")
+    print(f"向量为{chunk["embeding"]}")"""
 """问答"""
 def chat():
    print("进入问答模式,输入问题即可进行问答")
@@ -36,12 +36,18 @@ def chat():
        if qure == "q":
            print("退出问答")
            break
-       reswer = retrieve(qure,k=3)
-       print("\n检索结果--3条(最多)")
+       reswer = retrieve(qure,k=5)
+       #print("\n检索结果--5条(最多)")
        if not reswer:
            print("没有相关文档,抱歉")
            continue
-       for i,j in enumerate(reswer,start=1):
-           print(f"第{i}条:来源为{j['source']}内容为{j["content"]}")
+       top = rerank(qure,reswer,top_k=3)
+       prompt = rag_prompt(fromat_docs(top),qure)
+       res = call_llm(prompt)
+       print(f"\nAI回答为:{res}")
+       #print(f"\n最终提示词为{prompt}")
+       #print(f"\n==== 最相关的 {len(top)} 条 ====")
+       #for i,j in enumerate(top,start=1):
+           #print(f"第{i}条:来源为{j['source']}内容为{j["content"]}")
 if __name__ == "__main__":
     chat()

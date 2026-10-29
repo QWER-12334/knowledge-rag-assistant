@@ -1,4 +1,3 @@
-import uuid
 from langchain_chroma import Chroma
 from app.chunk import split_text
 from app.embeding import SiliconFlowEmbeddings
@@ -17,7 +16,7 @@ def add_doc(content:str,source:str):
         return
     texts = [item["content"] for item in chunks]
     metadata = [{"source":item["source"]} for item in chunks]
-    ids = [str(uuid.uuid4()) for _ in chunks]
+    ids = [f"{source}#{i}" for i in range(len(chunks))]
     vector_store.add_texts(
         texts = texts,
         ids =ids,

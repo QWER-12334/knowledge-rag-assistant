@@ -7,7 +7,7 @@ def retrieve(query:str,k:int = 5):
             "content":doc.page_content,
             "source":doc.metadata["source"]
         })
-        return res_list
+    return res_list
 if __name__ == "__main__":
     coll = vector_store._collection
     count = coll.count()
