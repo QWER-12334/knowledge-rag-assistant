@@ -5,7 +5,8 @@ def fromat_docs(doc_list:list[dict]):
     return "\n\n".join(parts)
 def rag_prompt(content_text:str,query_text:str):
     prompt_template = """你是一个问答助手，请严格只根据下面给出的参考资料回答用户问题。
-如果参考资料里面没有相关信息，直接回答【不确定，资料中未找到该内容】，禁止编造、猜测、引入外部知识。 
+如果参考资料里面没有相关信息,直接回答【这个我还不确定，请您自行去官网查询呢】,一些基本的常识知识你可以回答,你可以跟着时代的步伐去学习一些新知识
+但拿不准的禁止编造、猜测、引入外部知识。 
 参考资料：{content} ，问题：{query}"""
     return prompt_template.format(content=content_text,query=query_text)
 if __name__ == "__main__":
