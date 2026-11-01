@@ -13,7 +13,6 @@ for file_name in os.listdir(DATA_PATH):
         one_file_chunks = split_text(text = file_content,filename = file_name)
         all_chunk_list.extend(one_file_chunks)
         add_doc (file_content,file_name)
-        print(f"{file_name}入库完成,生成{len(one_file_chunks)}块")
 #输出切块
 print("\n==== 全部切块完成，一共", len(all_chunk_list), "块 ====")
 for i, chunk in enumerate(all_chunk_list[:]): 
