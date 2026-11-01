@@ -1,11 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,UploadFile, File
 from pydantic import BaseModel
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse,JSONResponse 
 from fastapi.openapi.docs import get_swagger_ui_html
 from app.retrieve import retrieve
 from app.prompt import fromat_docs,rag_prompt
 from app.generate import call_llm
 from app.rerank import rerank
+from app.data_storage import add_doc
 app = FastAPI(title="RAG知识库接口服务",docs_url=None)
 #请求体
 class Ask(BaseModel):
@@ -24,6 +25,19 @@ async def ask_aswer(req:Ask):
     def stream_generate():
         yield from call_llm(prompt)
     return StreamingResponse(stream_generate(),media_type="text/plain")
+@app.post("/upload")
+async def upload(f: UploadFile = File(...)):
+    if not f.filename.lower().endswith(".txt"):
+        return JSONResponse(status_code=400,content={"message":"只支持txt文件"})
+    file_content = await f.read()
+    try:
+        content_str = file_content.decode("utf-8")
+    except UnicodeDecodeError:
+        return JSONResponse(status_code=400,content={"message":"文件编码错误,请上传UTF-8编码文件"})
+    if not content_str.strip():
+        return JSONResponse(status_code=400,content={"message":"文件内容为空"})
+    add_doc(content_str,f.filename)
+    return {"message":"文件上传成功","filename":f.filename}
 @app.get("/docs", include_in_schema=False)
 def custom_docs():
       return get_swagger_ui_html(
@@ -36,3 +50,4 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main_fast_api:app", host="0.0.0.0", port=8000, reload=True)
     #curl -X POST http://127.0.0.1:8000/ask -H "Content-Type: application/json" -d "{\"query\":\"你好\"}"终端调试
+    #curl -X POST http://127.0.0.1:8000/upload -F "file=@data/09_测试文档.txt"上传文件
