@@ -7,6 +7,7 @@ from app.prompt import fromat_docs,rag_prompt
 from app.generate import call_llm
 from app.rerank import rerank
 from app.data_storage import add_doc
+import json
 app = FastAPI(title="RAG知识库接口服务",docs_url=None)
 @app.get("/chat")
 def home():
@@ -27,6 +28,12 @@ async def ask_aswer(req:Ask):
     prompt = rag_prompt(fromat_docs(top),req.query)
     def stream_generate():
         yield from call_llm(prompt)
+        sources = []
+        for d in top:
+            if d["source"] not in sources:
+                sources.append(d["source"])
+        yield "\n\n<<sources>>" + json.dumps(sources, ensure_ascii=False)
+            
     return StreamingResponse(stream_generate(),media_type="text/plain")
 @app.post("/upload")
 async def upload(f: UploadFile = File(...)):

@@ -1,21 +1,30 @@
 <!DOCTYPE html>
 <html lang="zh-CN">   
-<head>
+<head>  
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 页面宽度=手机屏幕宽度 -->
     <title>电商知识问答</title>
     <style>
+      * {
+          box-sizing: border-box; /* 计算面积的规则 */
+        }
+        .chat {
+          max-width: 480px;
+          margin: 0 auto;
+        }
       .answer-box {
         border: 4px solid #64bf6c;   
         padding: 12px;            
-        min-width: 400px;             
+        width: 100%;             
         min-height: 100px; 
         border-radius: 12px;
         overflow-y: auto;
         margin-top: 12px;  
-        font-size: 14px;       
+        font-size: 14px;
+        white-space: pre-wrap;       
       }
       .input-box{
-        width:400px;
+        width:100%;
         min-height: 100px;
         border: 3px solid #30727f;
         border-radius: 10px;
@@ -24,29 +33,66 @@
         resize: vertical; 
       }
       .button-box{
-        width:400px;
+        width:100%;
         height:40px;
         background-color:rgb(151, 129, 163);
         margin-top: 12px;
         border:1px solid #30727f;
         display:block;
       }
+      .sources-box{
+        margin-top:10px;
+        font-size:13px;
+        color:#30727f;
+        white-space: pre-line;
+      }
+      .upload-row{
+        margin-top:12px;
+        display:flex;
+        align-items:center;
+        gap:10px;
+      }
+      .upload-btn{
+        height:48px;
+        padding:0 18px;
+        background:#fff;
+        color:#30727f;
+        border:2px solid #30727f;
+        border-radius:10px;
+        font-size:16px;
+        cursor:pointer;
+      }
+      .upload-tip{
+        font-size:13px;
+        color:#666
+      }
     </style>
   </head>
   <body>
+    <div class="chat">
     <h1>电商知识问答助手</h1>
     <textarea  id ="question" class="input-box" placeholder="请输入问题"></textarea><!-- 问题输入框 -->
     <button class="button-box" onclick="handleSend()">发送</button><!-- 发送按钮 -->
     <div class="answer-box" id="answer">AI 的回答会显示在这里……</div> <!-- 回答框 -->
+    <div class="sources-box" id="source"></div>
+    <div class="upload-row">
+       <input type="file" id="file" accept=".txt" hidden>
+       <button class="upload-btn" onclick="document.getElementById('file').click()">上传文档</button>
+    <span class="upload-tip" id="uploadTip"></span>
+     </div> 
+  </div>
     <script>
+      var MARK = "<<sources>>";
       async function handleSend() {
         var text = document.getElementById("question").value; 
         var answerBox = document.getElementById("answer");
+        var sourcesBox = document.getElementById("source");
         if (!text){
           answerBox.innerText = "请输入问题后再发送";
           return;
         }
         answerBox.innerText = "正在生成回答，请稍等……";
+        sourcesBox.innerText = "";
         try{
           const res = await fetch("/ask",{
             method: "POST",
@@ -56,17 +102,62 @@
           if (!res.ok){
             throw new Error("HTTP " + res.status);
           }
-          const reader = res.body.getReader();
-          const decoder = new TextDecoder("utf-8");
+          const reader = res.body.getReader(); /* 获取数据流 */
+          const decoder = new TextDecoder("utf-8"); /* 创建解码器 TextDecoder是JS的转码工具 */
           answerBox.innerText = "";
+          var full = "";
           while(true){
             const {done,value}= await reader.read();
-            if (done) break;
-            answerBox.innerText += decoder.decode(value,{stream:true});
+            if (done) 
+            {
+              break;
+            }
+           full += decoder.decode(value,{stream:true});
+           var idx = full.indexOf(MARK);
+           if (idx ==-1){
+            answerBox.innerText = full;
+           }
+           else{
+            answerBox.innerText = full.slice(0,idx);
+           }
           }
+         var idx = full.indexOf(MARK);
+         if (idx != -1){
+          var list = JSON.parse(full.slice(idx + MARK.length));
+          sourcesBox.innerText = "参考来源："+list.join("\n");
+         }
         }
         catch(error){
           answerBox.innerText = "请求出错："+error.message;
+        }
+      }
+      document.getElementById("file").addEventListener("change",uploadFile);
+      async function uploadFile(){
+        var input = document.getElementById("file");
+        var tip = document.getElementById("uploadTip");
+        var file = input.files[0];
+        if (!file){
+          tip.innerText = "请选择文件上传";
+          return;
+        }
+        var form = new FormData();
+        form.append("f",file);
+        tip.innerText = "文件正在上传,请稍后"
+        try{
+          const res = await fetch("/upload",{
+            method:"POST",
+            body:form,
+          });
+          var data = await res.json();
+          if (!res.ok){
+            throw new Error("HTTP "+res.status)
+          }
+          tip.innerText = "文件上传成功:"+data.filename;
+          input.value = "";
+        }
+        catch(error)
+        {
+          tip.innerText = "文件上传失败："+error.message;
         }
       }
         </script>
