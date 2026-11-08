@@ -7,6 +7,8 @@ from app.prompt import fromat_docs,rag_prompt
 from app.generate import call_llm
 from app.rerank import rerank
 from app.data_storage import add_doc
+import logging
+logger = logging.getLogger(__name__)
 import json
 app = FastAPI(title="RAG知识库接口服务",docs_url=None)
 @app.get("/chat")
@@ -19,21 +21,30 @@ class Ask(BaseModel):
     top_k: int = 3
 @app.post("/ask")
 async def ask_aswer(req:Ask):
-    answer = retrieve(query=req.query,k=req.k)
-    if not answer:
-        def stream():
-            yield "没有相关文档,抱歉"
-        return StreamingResponse(stream(),media_type="text/plain")
-    top = rerank(req.query,answer,req.top_k)
-    prompt = rag_prompt(fromat_docs(top),req.query)
+    logger.info(f"收到请求:{req.query}")
+    try:
+        answer = retrieve(query=req.query,k=req.k)
+        if not answer:
+            def stream():
+                yield "没有相关文档,抱歉"
+            return StreamingResponse(stream(),media_type="text/plain")
+        top = rerank(req.query,answer,req.top_k)
+        prompt = rag_prompt(fromat_docs(top),req.query)
+    except Exception as e:
+        logger.error(f"处理问题失败{e}")
+        return JSONResponse(status_code=500, content={"message": f"服务出错了:{e}"})
     def stream_generate():
-        yield from call_llm(prompt)
+        try:
+            yield from call_llm(prompt)
+        except Exception as e:
+              logger.error(f"生成回答中断:{e}")
+              yield f"\n\n[生成中断] {e}"
+              return
         sources = []
         for d in top:
             if d["source"] not in sources:
                 sources.append(d["source"])
         yield "\n\n<<sources>>" + json.dumps(sources, ensure_ascii=False)
-            
     return StreamingResponse(stream_generate(),media_type="text/plain")
 @app.post("/upload")
 async def upload(f: UploadFile = File(...)):
@@ -46,7 +57,12 @@ async def upload(f: UploadFile = File(...)):
         return JSONResponse(status_code=400,content={"message":"文件编码错误,请上传UTF-8编码文件"})
     if not content_str.strip():
         return JSONResponse(status_code=400,content={"message":"文件内容为空"})
-    add_doc(content_str,f.filename)
+    try:
+        add_doc(content_str,f.filename)
+    except Exception as e:
+        logger.error(f"上传入库失败:{e}")
+        return JSONResponse(status_code=500, content={"message": f"入库失败:{e}"})
+    logger.info(f"上传成功:{f.filename}")
     return {"message":"文件上传成功","filename":f.filename}
 # 当需要测试时/上传文档时/crul测试时需要打开下面部分
 @app.get("/docs", include_in_schema=False)

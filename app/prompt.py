@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 def fromat_docs(doc_list:list[dict]):
     parts = []
     for i,doc in enumerate(doc_list,start =1):
@@ -8,7 +10,9 @@ def rag_prompt(content_text:str,query_text:str):
 如果参考资料里面没有相关信息,直接回答【这个我还不确定，请您自行去官网查询呢】,一些基本的常识知识你可以回答,你可以跟着时代的步伐去学习一些新知识
 但拿不准的禁止编造、猜测、引入外部知识。 
 参考资料：{content} ，问题：{query}"""
-    return prompt_template.format(content=content_text,query=query_text)
+    prompt = prompt_template.format(content=content_text,query=query_text)
+    logger.debug(f"提示词组装完成:{len(content_text)}字资料 + {len(query_text)}字问题")
+    return prompt
 if __name__ == "__main__":
     text = [ {"content": "Python是一门解释型编程语言,由吉多开发。", "source": "测试.txt"},
           {"content": "Java 是编译型语言。", "source": "测试.txt"},]

@@ -1,6 +1,8 @@
 import os
 import requests
 from  dotenv import load_dotenv
+import logging
+logger = logging.getLogger(__name__)
 load_dotenv()
 API_KEY = os.getenv("SILICONFLOW_API_KEY")
 rerank_url = "https://api.siliconflow.cn/v1/rerank"
@@ -13,22 +15,33 @@ def rerank(query:str,doc_list:list[dict],top_k:int = 5):
         "query":query,
         "documents":[item["content"] for item in doc_list]
     }
-    res = requests.post(
-        rerank_url,
-        headers = {
-            "Authorization":f"Bearer {API_KEY}",
-            "Content-Type":"application/json",
-        },
-        json = payload,
-        timeout = 30,
-    )
-    res.raise_for_status()
+    try:
+        res = requests.post(
+            rerank_url,
+            headers = {
+                "Authorization":f"Bearer {API_KEY}",
+                "Content-Type":"application/json",
+            },
+            json = payload,
+            timeout = 30,
+        )
+        res.raise_for_status()
+    except  requests.Timeout:
+        logger.error("重排超时:等了30s还没有反应")
+        raise RuntimeError("重拍超时,请检查网络后重试")
+    except requests.ConnectionError:
+        logger.error("重排失败：连不上服务器")
+        raise RuntimeError("连不上 SiliconFlow,请检查网络")
+    except requests.HTTPError:
+        logger.error(f"重排失败:HTTP {res.status_code}")
+        raise RuntimeError(f"重排请求被拒绝(HTTP {res.status_code})")
     ranks = res.json()["results"]
     out = []
     for i in ranks [:top_k]:
         new_doc =  dict(doc_list[i["index"]])#dict复制
         new_doc["rerank_score"] = round(i["relevance_score"], 4)
         out.append(new_doc)
+    logger.info(f"重排成功:一共{len(doc_list)},重排之后有{len(out)}条文档")
     return out
 if __name__ == "__main__":
     test_query = "python怎么读取csv文件"

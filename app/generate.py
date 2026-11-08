@@ -4,7 +4,9 @@ from app.rerank import rerank
 from app.retrieve import retrieve
 from app.prompt import rag_prompt,fromat_docs
 import json
+import logging
 import requests
+logger = logging.getLogger(__name__)
 load_dotenv()
 api_key = os.getenv("SILICONFLOW_API_KEY")
 model_name = "Qwen/Qwen2.5-7B-Instruct"
@@ -19,8 +21,19 @@ def call_llm(prompt:str):
     headers = {
         "Authorization":f"Bearer {api_key}","Content-Type":"application/json"
     }
-    response = requests.post(url,headers= headers,json = payload, stream=True)
-    response.raise_for_status()
+    try:
+        response = requests.post(url,headers= headers,json = payload, stream=True,timeout = 30)
+        response.raise_for_status()
+    except requests.Timeout:
+        logger.error("生成超时:等了30s还没有反应")
+        raise RuntimeError("生成超时:请检查网络后重试")
+    except requests.ConnectionError:
+        logger.error("调用大模型失败,连不上服务器")
+        raise RuntimeError("连不上 SiliconFlow,请检查网络")
+    except requests.HTTPError:
+        logger.error(f"生成失败:HTTP {response.status_code}")
+        raise RuntimeError(f"生成请求被拒绝(HTTP {response.status_code})")
+    char = 0
     for raw_line in response.iter_lines():
         if not raw_line:
             continue
@@ -33,7 +46,9 @@ def call_llm(prompt:str):
         chunk = json.loads(data)
         content = chunk["choices"][0]["delta"].get("content","")
         if content:
+            char += len(content)
             yield content
+    logger.info(f"生成成功:一共{char}字符")
 def rag_answer(query: str):
     # 1.检索
     raw_docs = retrieve(query)

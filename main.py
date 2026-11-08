@@ -2,6 +2,8 @@ from app.retrieve import retrieve
 from app.prompt import fromat_docs,rag_prompt
 from app.generate import call_llm
 from app.rerank import rerank
+import logging
+logger = logging.getLogger(__name__)
 def chat():
    print("进入问答模式,输入问题即可进行问答")
    while True:
@@ -9,16 +11,21 @@ def chat():
        if qure == "q":
            print("退出问答")
            break
-       reswer = retrieve(qure,k=5)
-       #print("\n检索结果--5条(最多)")
-       if not reswer:
-           print("没有相关文档,抱歉")
-           continue
-       top = rerank(qure,reswer,top_k=3)
-       prompt = rag_prompt(fromat_docs(top),qure)
-       res =  call_llm(prompt)
-       for i in res:
-            print(i,end="",flush=True)
+       try:
+        reswer = retrieve(qure,k=5)
+        #print("\n检索结果--5条(最多)")
+        if not reswer:
+            print("没有相关文档,抱歉")
+            continue
+        top = rerank(qure,reswer,top_k=3)
+        prompt = rag_prompt(fromat_docs(top),qure)
+        res =  call_llm(prompt)
+        for i in res:
+                print(i,end="",flush=True)
+       except Exception as e:
+            logger.error(f"问答错误{e}")
+            print(f"问答失败,请检查网络或api密钥")
+            
        #print(f"\n最终提示词为{prompt}")
        #print(f"\n==== 最相关的 {len(top)} 条 ====")
        #for i,j in enumerate(top,start=1):
