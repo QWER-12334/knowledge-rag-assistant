@@ -17,7 +17,7 @@ def home():
 #请求体
 class Ask(BaseModel):
     query:str
-    k:int =5
+    k:int =10
     top_k: int = 3
 @app.post("/ask")
 async def ask_aswer(req:Ask):

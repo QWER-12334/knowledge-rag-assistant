@@ -12,7 +12,7 @@ def chat():
            print("退出问答")
            break
        try:
-        reswer = retrieve(qure,k=5)
+        reswer = retrieve(qure,k=10)
         #print("\n检索结果--5条(最多)")
         if not reswer:
             print("没有相关文档,抱歉")
