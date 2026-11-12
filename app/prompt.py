@@ -6,12 +6,14 @@ def fromat_docs(doc_list:list[dict]):
         parts.append(f"【资料：{i}】(来源：{doc["source"]}) \n 内容:{doc["content"]}")
     return "\n\n".join(parts)
 def rag_prompt(content_text:str,query_text:str):
-    prompt_template = """你是一个问答助手，请严格只根据下面给出的参考资料回答用户问题。
-如果参考资料里面没有相关信息,直接回答【这个我还不确定，请您自行去官网查询呢】,一些基本的常识知识你可以回答,你可以跟着时代的步伐去学习一些新知识
-但拿不准的禁止编造、猜测、引入外部知识。 
+    prompt_template = """你是一个问答助手，请根据下面给出的参考资料回答用户问题。规则按优先级从高到低：
+1. 参考资料里有的内容，按原文回答，不要改口。原文写"突破""超过"就照用，不要换成"增长较快""持续提升"之类的软话；原文自带"预计"的，照抄原文的"预计"。
+2. 参考资料里没有的内容，可以用常识补充，但不许编造具体数字、时间、机构名称，不许猜测。
+3. 实在拿不准时，只回答【这个我还不确定，请您自行去官网查询呢】，不要解释原因。
+4. 除了照抄原文，回答中不许出现"资料中没有""报告没有提到"之类的说法，也不许自己加"预计""大约""可能""有望"等推测词。
 参考资料：{content} ，问题：{query}"""
-    prompt = prompt_template.format(content=content_text,query=query_text)
-    logger.debug(f"提示词组装完成:{len(content_text)}字资料 + {len(query_text)}字问题")
+    prompt =   prompt_template.format(content=content_text,query=query_text)
+    logger.debug(f"完整提示词为{prompt}")
     return prompt
 if __name__ == "__main__":
     text = [ {"content": "Python是一门解释型编程语言,由吉多开发。", "source": "测试.txt"},
