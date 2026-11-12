@@ -12,7 +12,7 @@ def rag_prompt(content_text:str,query_text:str):
 3. 实在拿不准时，只回答【这个我还不确定，请您自行去官网查询呢】，不要解释原因。
 4. 除了照抄原文，回答中不许出现"资料中没有""报告没有提到"之类的说法，也不许自己加"预计""大约""可能""有望"等推测词。
 参考资料：{content} ，问题：{query}"""
-    prompt =   prompt_template.format(content=content_text,query=query_text)
+    prompt = prompt_template.format(content=content_text,query=query_text)
     logger.debug(f"完整提示词为{prompt}")
     return prompt
 if __name__ == "__main__":
