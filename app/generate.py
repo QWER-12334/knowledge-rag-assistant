@@ -15,7 +15,7 @@ def call_llm(prompt:str):
     payload = {
         "model":model_name,
         "messages" :[{"role":"user","content":prompt}],
-        "temperature":0.5,
+        "temperature":0.2,
         "stream":True
     }
     headers = {
