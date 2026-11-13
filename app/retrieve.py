@@ -1,7 +1,7 @@
 from app.data_storage import vector_store
 import logging
 logger = logging.getLogger(__name__)
-def retrieve(query:str,k:int = 5):
+def retrieve(query:str,k:int = 10):
     try:
         docs = vector_store.similarity_search(query,k = k)
     except Exception as e:
