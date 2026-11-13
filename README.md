@@ -53,6 +53,7 @@ knowledge-rag-assistant/
 │   └── generate.py     # 大模型生成
 ├── data/               # 知识库原始文档（txt）
 ├── chroma_db/          # 向量库本地存储
+├── main.py             # 终端聊天页面
 ├── index.html          # 前端聊天页面
 ├── main_fast_api.py    # FastAPI 入口
 └── requirements.txt    # 依赖清单
