@@ -1,7 +1,7 @@
-import requests
+import requests #requests库用于发送http请求
 from dotenv import load_dotenv#用于读取.env的工具
 import os
-from langchain_core.embeddings import Embeddings
+from langchain_core.embeddings import Embeddings #langchain的向量化接口必须是类
 import logging
 load_dotenv()
 logger=logging.getLogger(__name__)
@@ -33,7 +33,7 @@ class SiliconFlowEmbeddings(Embeddings):
         except requests.HTTPError:
             logger.error("向量化错误:服务器返回错误")
             raise RuntimeError(f"SiliconFlow 拒绝了请求(HTTP {response.status_code})，检查密钥或额度")
-        data = response.json()
+        data = response.json()#json字符串转化成字典
         vector =  [item["embedding"] for item in data["data"]]
         logger.info(f"向量化成功:一共{len(vector)}条文档,每条{len(vector[0])}维")
         return vector

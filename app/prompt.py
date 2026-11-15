@@ -4,7 +4,7 @@ def fromat_docs(doc_list:list[dict]):
     parts = []
     for i,doc in enumerate(doc_list,start =1):
         parts.append(f"【资料：{i}】(来源：{doc["source"]}) \n 内容:{doc["content"]}")
-    return "\n\n".join(parts)
+    return "\n\n".join(parts)#join是把列表里的元素用\n\n(换行之后再换行=空一行，头尾没有)连接起来
 def rag_prompt(content_text:str,query_text:str):
     prompt_template = """你是一个问答助手，请根据下面给出的参考资料回答用户问题。规则按优先级从高到低：
 1. 参考资料里有的内容，按原文回答，不要改口。原文写"突破""超过"就照用，不要换成"增长较快""持续提升"之类的软话；原文自带"预计"的，照抄原文的"预计"。

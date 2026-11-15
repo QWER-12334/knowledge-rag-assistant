@@ -4,7 +4,8 @@ logger = logging.getLogger(__name__)
 def retrieve(query:str,k:int = 10):
     try:
         docs = vector_store.similarity_search(query,k = k)
-    except Exception as e:
+        #similarity_search 是langchain原生的检索方法用于检索相似的chunk
+    except Exception as e:#捕获错误异常存到e里， 能抓到大部分错误
           logger.error(f"检索失败：{e}")
           raise RuntimeError(f"检索失败,请检查向量库和网络：{e}")
     if not docs:
@@ -13,8 +14,8 @@ def retrieve(query:str,k:int = 10):
     res_list = []
     for doc in docs:
         res_list.append({
-            "content":doc.page_content,
-            "source":doc.metadata["source"]
+            "content":doc.page_content, #page_content是langchain原生的方法用于获取chunk的content
+            "source":doc.metadata["source"] #metadata是langchain原生的方法用于获取chunk的metadata
         })
     logger.info(f"检索成功:一共{len(res_list)}条文档")
     return res_list

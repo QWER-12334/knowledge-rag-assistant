@@ -1,6 +1,6 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)#拿到当前python文件的日志对象
 def split_text(text:str , filename:str, chunk_size=500,chunk_overlap=50):
     if not text or not text.strip():
         logger.warning(f"文本为空，跳过切分")

@@ -1,7 +1,11 @@
 from fastapi import FastAPI,UploadFile, File
 from pydantic import BaseModel
 from fastapi.responses import StreamingResponse,JSONResponse,FileResponse
+#JSONResponse用来给前端返回一个标准 JSON 格式的 HTTP 响应对象
+#FileResponse用来给前端返回一个文件响应对象
+#StreamingResponse是FastAPI 的流式响应对象，配合 `yield` 生成器，一块一块往外发数据，不用等全部内容生成完再一次性返回
 from fastapi.openapi.docs import get_swagger_ui_html
+#get_swagger_ui_html它是 FastAPI 里用来生成 Swagger 接口文档页面的 HTML 的函数**FastAPI
 from app.retrieve import retrieve
 from app.prompt import fromat_docs,rag_prompt
 from app.generate import call_llm
@@ -9,7 +13,7 @@ from app.rerank import rerank
 from app.data_storage import add_doc
 import logging
 logger = logging.getLogger(__name__)
-import json
+import json#处理json数据
 app = FastAPI(title="RAG知识库接口服务",docs_url=None)
 @app.get("/chat")
 def home():

@@ -16,13 +16,13 @@ def call_llm(prompt:str):
         "model":model_name,
         "messages" :[{"role":"user","content":prompt}],
         "temperature":0.2,
-        "stream":True
+        "stream":True#流式返回
     }
     headers = {
         "Authorization":f"Bearer {api_key}","Content-Type":"application/json"
     }
     try:
-        response = requests.post(url,headers= headers,json = payload, stream=True,timeout = 30)
+        response = requests.post(url,headers= headers,json = payload, stream=True,timeout = 30)#stream=True表示流式返回
         response.raise_for_status()
     except requests.Timeout:
         logger.error("生成超时:等了30s还没有反应")
@@ -38,18 +38,18 @@ def call_llm(prompt:str):
         if not raw_line:
             continue
         line = raw_line.decode("utf-8")
-        if not line.startswith("data: "):
+        if not line.startswith("data: "):#过滤掉非数据(即没有data:)的行
             continue
-        data = line[6:]
-        if data == "[DONE]":
+        data = line[6:]#去掉data:前缀
+        if data == "[DONE]":#流式返回结束
             break
-        chunk = json.loads(data)
-        content = chunk["choices"][0]["delta"].get("content","")
+        chunk = json.loads(data)#将json字符串转化成字典
+        content = chunk["choices"][0]["delta"].get("content","")#get方法可以避免key不存在时报错
         if content:
             char += len(content)
             yield content
     logger.info(f"生成成功:一共{char}字符")
-def rag_answer(query: str):
+def rag_answer(query: str):#RAG回答整套流程
     # 1.检索
     raw_docs = retrieve(query)
     # 2.重排

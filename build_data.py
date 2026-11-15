@@ -1,3 +1,4 @@
+#处理原始数据层
 import os#处理路径
 from app.chunk import split_text
 from app.data_storage import add_doc

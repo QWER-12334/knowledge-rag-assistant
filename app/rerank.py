@@ -35,11 +35,12 @@ def rerank(query:str,doc_list:list[dict],top_k:int = 5):
     except requests.HTTPError:
         logger.error(f"重排失败:HTTP {res.status_code}")
         raise RuntimeError(f"重排请求被拒绝(HTTP {res.status_code})")
-    ranks = res.json()["results"]
+    ranks = res.json()["results"]#这个数组的分数从高到低排
     out = []
     for i in ranks [:top_k]:
         new_doc =  dict(doc_list[i["index"]])#dict复制
         new_doc["rerank_score"] = round(i["relevance_score"], 4)
+        #在new_doc中添加rerank_score字段值为relevance_score保留4位小数
         out.append(new_doc)
     logger.info(f"重排成功:一共{len(doc_list)},重排之后有{len(out)}条文档")
     return out
