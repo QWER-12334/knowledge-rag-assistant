@@ -1,8 +1,8 @@
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter #RecursiveCharacterTextSplitter是文本切分器
 import logging
 logger = logging.getLogger(__name__)#拿到当前python文件的日志对象
 def split_text(text:str , filename:str, chunk_size=500,chunk_overlap=50):
-    if not text or not text.strip():
+    if not text or not text.strip(): #strip删掉一个空白符
         logger.warning(f"文本为空，跳过切分")
         return []
     try:
@@ -12,9 +12,9 @@ def split_text(text:str , filename:str, chunk_size=500,chunk_overlap=50):
             length_function = len,
         )
         chunks = text_chunk.split_text(text)#切分完是列表！！！
-    except Exception as e:
+    except Exception as e:#捕获错误异常存到e里， 能抓到大部分错误
         logger.error(f"{filename}切分失败:{e}")
-        raise RuntimeError(f"{filename}切分失败:{e}")
+        raise RuntimeError(f"{filename}切分失败:{e}") #RuntimeError是运行时错误。
     text_list = []
     for i in chunks:
         text_list.append(

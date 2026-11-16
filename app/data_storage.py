@@ -4,8 +4,8 @@ from app.embeding import SiliconFlowEmbeddings
 import logging
 logger = logging.getLogger(__name__)
 #向量库配置
-PERSIST = "./chroma_db"
-COLLECTION_NAME = "rag_docs"
+PERSIST = "./chroma_db" #向量库文件名
+COLLECTION_NAME = "rag_docs" #向量库名
 vector_store = Chroma(
     persist_directory = PERSIST,
     collection_name = COLLECTION_NAME,

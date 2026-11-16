@@ -13,7 +13,7 @@ def chat():
            break
        try:
         reswer = retrieve(qure,k=10)
-        #print("\n检索结果--5条(最多)")
+        #print("\n检索结果--10条(最多)")
         if not reswer:
             print("没有相关文档,抱歉")
             continue

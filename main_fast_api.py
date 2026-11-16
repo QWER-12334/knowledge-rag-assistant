@@ -44,13 +44,13 @@ async def ask_aswer(req:Ask):
               logger.error(f"生成回答中断:{e}")
               yield f"\n\n[生成中断] {e}"
               return
-        sources = []
+        sources = []#加上内容的来源
         for d in top:
             if d["source"] not in sources:
                 sources.append(d["source"])
-        yield "\n\n<<sources>>" + json.dumps(sources, ensure_ascii=False)
+        yield "\n\n<<sources>>" + json.dumps(sources, ensure_ascii=False)#json.dumps将字典转换成json字符串
     return StreamingResponse(stream_generate(),media_type="text/plain")
-@app.post("/upload")
+@app.post("/upload")#上传文件接口
 async def upload(f: UploadFile = File(...)):
     if not f.filename.lower().endswith(".txt"):
         return JSONResponse(status_code=400,content={"message":"只支持txt文件"})

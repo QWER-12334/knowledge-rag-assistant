@@ -33,7 +33,7 @@ class SiliconFlowEmbeddings(Embeddings):
         except requests.HTTPError:
             logger.error("向量化错误:服务器返回错误")
             raise RuntimeError(f"SiliconFlow 拒绝了请求(HTTP {response.status_code})，检查密钥或额度")
-        data = response.json()#json字符串转化成字典
+        data = response.json()#json字符串转化成字典，是Response自带的方法！
         vector =  [item["embedding"] for item in data["data"]]
         logger.info(f"向量化成功:一共{len(vector)}条文档,每条{len(vector[0])}维")
         return vector
